@@ -3,19 +3,15 @@ set :passenger_version, "2.0.6"
 
 require 'net/http'
 
+set :ruby_enterprise_url do
+  Net::HTTP.get('www.rubyenterpriseedition.com', '/download.html').scan(/http:.*\.tar\.gz/).first
+end
+
+set :ruby_enterprise_version do
+  "#{ruby_enterprise_url[/(ruby-enterprise.*)(.tar.gz)/, 1]}"
+end
+
 namespace :ruby do
-  def ruby_enterprise_url
-    unless @ruby_enterprise_url
-      doc = Net::HTTP.get( 'www.rubyenterpriseedition.com', '/download.html' )
-      @ruby_enterprise_url = doc.scan(/http:.*\.tar\.gz/).first
-    end
-    @ruby_enterprise_url
-  end
-
-  def ruby_enterprise_version
-    "#{ruby_enterprise_url[/(ruby-enterprise.*)(.tar.gz)/, 1]}"
-  end
-
   desc "Install Ruby 1.8"
   task :setup_18, :roles => :app do
     sudo "aptitude install -y ruby1.8-dev ruby1.8 ri1.8 rdoc1.8 irb1.8 libreadline-ruby1.8 libruby1.8 libopenssl-ruby sqlite3 libsqlite3-ruby1.8"
